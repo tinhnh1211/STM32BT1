@@ -54,6 +54,14 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void delay_1s(void) {
+    uint32_t ticks = 8000000;
+    SysTick->LOAD = ticks - 1;
+    SysTick->VAL = 0;
+    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
+    while ((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) == 0);
+    SysTick->CTRL = 0;
+}
 
 /* USER CODE END 0 */
 
@@ -86,18 +94,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
+	  RCC->AHBENR	|= 0xFC;//Enable the clocks for GPIO ports
+	  GPIOA->CRL = 0X44344444;//PA5 as output
   /* USER CODE END 2 */
+	  RCC->APB2ENR |= 0xFC; //Enable the clocks for GPIO ports
+	  GPIOA->CRL = 0x44344444; //PA0 to PA7 as outputs
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, SET);
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, RESET);
-	  HAL_Delay(1000);
+	  GPIOA->ODR = 0x0000; //make all the pins of Port A low
+	  delay_1s(); //wait 1s
+	  GPIOA->ODR = 0xFFFF; //make all the pins of Port A high
+	  delay_1s(); //wait 1s
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
